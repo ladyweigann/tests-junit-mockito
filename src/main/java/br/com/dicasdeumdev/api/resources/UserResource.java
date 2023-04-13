@@ -2,6 +2,7 @@ package br.com.dicasdeumdev.api.resources;
 
 import br.com.dicasdeumdev.api.domain.dto.UserDTO;
 import br.com.dicasdeumdev.api.services.UserService;
+import br.com.dicasdeumdev.api.domain.User;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,5 +41,12 @@ public class UserResource {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
                 .buildAndExpand(userService.create(obj).getId()).toUri();
         return ResponseEntity.created(uri).build();
+    }
+
+    @PutMapping(value = "/{id}")
+    public ResponseEntity<UserDTO> update(@PathVariable Integer id, @RequestBody UserDTO obj){
+        obj.setId(id);
+        User user = userService.update(obj);
+        return ResponseEntity.ok().body(mapper.map(user, UserDTO.class));
     }
 }

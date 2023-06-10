@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class UserServiceImplTest {
 
@@ -114,11 +114,49 @@ class UserServiceImplTest {
     }
 
     @Test
-    void update() {
+    void whenUpdateThenReturnSuccess() {
+        when(repository.save(any())).thenReturn(user);
+
+        User response = service.update(userDTO);
+
+        assertNotNull(response);
+        assertEquals(User.class, response.getClass());
+        assertEquals(ID, response.getId());
+        assertEquals(NAME, response.getName());
+        assertEquals(EMAIL, response.getEmail());
+        assertEquals(PASSWORD, response.getPassword());
     }
 
     @Test
-    void delete() {
+    void whenUpdateThenReturnAnDataIntegrityViolationException() {
+        when(repository.findByEmail(anyString())).thenThrow(new DataIntegratyViolationException("Email já existente"));
+
+        try{
+            service.update(userDTO);
+        }catch(Exception e) {
+            assertEquals(DataIntegratyViolationException.class, e.getClass());
+        }
+    }
+
+    @Test
+    void whenDeleteThenReturnSuccess() {
+        when(repository.findById(any())).thenReturn(optionalUser);
+        doNothing().when(repository).deleteById(anyInt());
+
+        service.delete(ID);
+
+        verify(repository, times(1)).deleteById(anyInt());
+    }
+
+    @Test
+    void whenDeleteThenReturnObjectNotFoundException() {
+        when(repository.findById(any())).thenThrow(new ObjectNotFoundException("Objeto não encontrado"));
+
+        try{
+            service.delete(ID);
+        }catch (Exception e) {
+            assertEquals(ObjectNotFoundException.class, e.getClass());
+        }
     }
 
     private void startUser() {
